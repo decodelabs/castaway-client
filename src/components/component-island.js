@@ -1,6 +1,4 @@
-import { getComponentLoader } from '../registry';
-import vueIntegration from '../integrations/vue.js';
-import reactIntegration from '../integrations/react.js';
+import { getComponentLoader, getIntegration } from '../registry';
 
 class ComponentIsland extends HTMLElement {
 
@@ -39,21 +37,7 @@ class ComponentIsland extends HTMLElement {
             throw new Error('No component island framework:src attribute found');
         }
 
-        let integration;
-
-        switch (this.#framework) {
-            case 'vue':
-                integration = vueIntegration;
-                break;
-
-            case 'react':
-                integration = reactIntegration;
-                break;
-
-            default:
-                throw new Error(`No component integration found for ${this.#framework}:${src}`);
-        }
-
+        const integration = await getIntegration(this.#framework);
         const loader = await getComponentLoader(src);
 
         if (!loader) {

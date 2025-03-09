@@ -12,8 +12,16 @@ npm install @decodelabs/castaway
 
 ```javascript
 import { createCastawayApp } from '@decodelabs/castaway'
+import vue from '@decodelabs/castaway/vue'
+import react from '@decodelabs/castaway/react'
 
 createCastawayApp({
+    // Framework integrations
+    integrations: [
+        vue,
+        react
+    ],
+
     // Components loadable from HTML
     components: {
         'MyComponent': () => import('./components/my-component.vue')

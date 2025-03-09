@@ -13,10 +13,17 @@
   "license": "MIT",
   "author": "Tom Wright",
   "type": "module",
-  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./vue": "./src/integrations/vue.js",
+    "./react": "./src/integrations/react.js"
+  },
   "dependencies": {
   },
   "peerDependencies": {
-    "vite": "^6"
+    "vite": "^6",
+    "react": "^19",
+    "react-dom": "^19",
+    "vue": "^3"
   }
 }
