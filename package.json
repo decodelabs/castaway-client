@@ -1,0 +1,23 @@
+{
+  "name": "castaway",
+  "version": "0.1.0",
+  "description": "Front end island components",
+  "homepage": "https://github.com/decodelabs/castaway-client#readme",
+  "bugs": {
+    "url": "https://github.com/decodelabs/castaway-client/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decodelabs/castaway-client.git"
+  },
+  "license": "MIT",
+  "author": "Tom Wright",
+  "type": "module",
+  "main": "src/index.js",
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "vite": "^6",
+    "vue": "^3"
+  }
+}
