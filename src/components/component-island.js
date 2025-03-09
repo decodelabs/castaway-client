@@ -1,4 +1,4 @@
-import { getComponentLoader } from '@scripts/castaway';
+import { getComponentLoader } from '../index';
 
 class ComponentIsland extends HTMLElement {
 
@@ -37,7 +37,7 @@ class ComponentIsland extends HTMLElement {
             throw new Error('No component island framework:src attribute found');
         }
 
-        const integration = await import(`@scripts/castaway/${this.#framework}-integration.js`);
+        const integration = await import(`../integrations/${this.#framework}.js`);
         const loader = getComponentLoader(src);
 
         if (!loader) {
