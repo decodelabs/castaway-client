@@ -1,5 +1,6 @@
 import { getComponentLoader } from '../registry';
 import vueIntegration from '../integrations/vue.js';
+import reactIntegration from '../integrations/react.js';
 
 class ComponentIsland extends HTMLElement {
 
@@ -43,6 +44,10 @@ class ComponentIsland extends HTMLElement {
         switch (this.#framework) {
             case 'vue':
                 integration = vueIntegration;
+                break;
+
+            case 'react':
+                integration = reactIntegration;
                 break;
 
             default:
