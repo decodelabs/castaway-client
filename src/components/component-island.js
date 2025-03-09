@@ -1,4 +1,5 @@
-import { getComponentLoader } from '../index';
+import { getComponentLoader } from '../registry';
+import vueIntegration from '../integrations/vue.js';
 
 class ComponentIsland extends HTMLElement {
 
@@ -37,8 +38,18 @@ class ComponentIsland extends HTMLElement {
             throw new Error('No component island framework:src attribute found');
         }
 
-        const integration = await import(`../integrations/${this.#framework}.js`);
-        const loader = getComponentLoader(src);
+        let integration;
+
+        switch (this.#framework) {
+            case 'vue':
+                integration = vueIntegration;
+                break;
+
+            default:
+                throw new Error(`No component integration found for ${this.#framework}:${src}`);
+        }
+
+        const loader = await getComponentLoader(src);
 
         if (!loader) {
             throw new Error(`No component loader found for ${this.#framework}:${src}`);
@@ -46,7 +57,7 @@ class ComponentIsland extends HTMLElement {
 
         const componentModule = await loader();
 
-        this.#integrationRoot = integration.default(this, componentModule.default).then(() => {
+        this.#integrationRoot = integration(this, componentModule.default).then(() => {
             this._internals.states.add("mounted");
         });
     }

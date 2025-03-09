@@ -1,7 +1,6 @@
+import { defineComponents as a, getComponentLoader as b, bundled } from './registry.js';
 import './components/content-island.js';
 import './components/component-island.js';
-
-let bundled = {};
 
 export const createCastawayApp = (options) => {
     defineComponents(options.components ?? {});
@@ -15,13 +14,5 @@ export const createCastawayApp = (options) => {
 
 export default createCastawayApp;
 
-export const defineComponents = (components) => {
-    bundled = {
-        ...bundled,
-        ...components
-    };
-};
-
-export const getComponentLoader = (name) => {
-    return bundled[name];
-};
+export const defineComponents = a;
+export const getComponentLoader = b;
