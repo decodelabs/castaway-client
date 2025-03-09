@@ -17,9 +17,6 @@
   "dependencies": {
   },
   "peerDependencies": {
-    "vite": "^6",
-    "react": "^19",
-    "react-dom": "^19",
-    "vue": "^3"
+    "vite": "^6"
   }
 }
