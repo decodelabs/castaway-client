@@ -5,7 +5,7 @@ export default (element, component) => {
         const app = createApp({
             name: component.name + '-host',
             mounted() {
-                resolve();
+                resolve(app);
             },
             render() {
                 return h(component);
