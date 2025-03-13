@@ -16,7 +16,7 @@ class ComponentIsland extends HTMLElement {
         this._internals = this.attachInternals();
     }
 
-    get collapsed() {
+    get mounted() {
         return this._internals.states.has("mounted");
     }
 
@@ -40,13 +40,7 @@ class ComponentIsland extends HTMLElement {
         const integration = await getIntegration(this.#framework);
         const loader = await getComponentLoader(src);
 
-        if (!loader) {
-            throw new Error(`No component loader found for ${this.#framework}:${src}`);
-        }
-
-        const componentModule = await loader();
-
-        this.#integrationRoot = integration(this, componentModule.default).then(() => {
+        this.#integrationRoot = integration(src, await loader(), this).then(() => {
             this._internals.states.add("mounted");
         });
     }

@@ -1,6 +1,8 @@
 import { createApp, h } from 'vue';
 
-export default (element, component) => {
+export default (name, module, element) => {
+    const component = module.default;
+
     return new Promise((resolve) => {
         const app = createApp({
             name: component.name + '-host',
