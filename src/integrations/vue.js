@@ -1,6 +1,6 @@
 import { createApp, h } from 'vue';
 
-export default (name, module, element) => {
+export default ({ name, module, props, element }) => {
     const component = module.default;
 
     return new Promise((resolve) => {
@@ -10,7 +10,7 @@ export default (name, module, element) => {
                 resolve(app);
             },
             render() {
-                return h(component);
+                return h(component, props);
             }
         });
 

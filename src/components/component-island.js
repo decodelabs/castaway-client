@@ -2,13 +2,24 @@ import { getComponentLoader, getIntegration } from '../registry';
 
 class ComponentIsland extends HTMLElement {
 
-    static observedAttributes = [];
-
     #framework;
-    #integrationRoot;
+    #src;
+    #props;
 
     get framework() {
         return this.#framework;
+    }
+
+    get src() {
+        return this.#src;
+    }
+
+    get props() {
+        return this.#props;
+    }
+
+    get mounted() {
+        return this._internals.states.has("mounted");
     }
 
     constructor() {
@@ -16,20 +27,19 @@ class ComponentIsland extends HTMLElement {
         this._internals = this.attachInternals();
     }
 
-    get mounted() {
-        return this._internals.states.has("mounted");
-    }
-
     async connectedCallback() {
-        let src;
-
         for (let attribute of this.attributes) {
             const match = attribute.name.match(/^([a-z]+):src$/);
 
             if (match) {
                 this.#framework = match[1];
-                src = attribute.value;
-                break;
+                this.#src = attribute.value;
+                continue;
+            }
+
+            if (attribute.name === 'props') {
+                this.#props = JSON.parse(attribute.value);
+                continue;
             }
         }
 
@@ -38,9 +48,14 @@ class ComponentIsland extends HTMLElement {
         }
 
         const integration = await getIntegration(this.#framework);
-        const loader = await getComponentLoader(src);
+        const loader = await getComponentLoader(this.#src);
 
-        this.#integrationRoot = integration(src, await loader(), this).then(() => {
+        integration({
+            name: this.#src,
+            module: await loader(),
+            props: this.#props ?? {},
+            element: this
+        }).then(() => {
             this._internals.states.add("mounted");
         });
     }
