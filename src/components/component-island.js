@@ -2,13 +2,13 @@ import { getIntegration } from '../registry';
 
 class ComponentIsland extends HTMLElement {
 
-    static observedAttributes = ['src', 'props'];
+    static observedAttributes = ['name', 'props'];
 
-    #src;
+    #name;
     #props;
 
-    get src() {
-        return this.#src;
+    get name() {
+        return this.#name;
     }
 
     get props() {
@@ -25,14 +25,14 @@ class ComponentIsland extends HTMLElement {
     }
 
     async connectedCallback() {
-        if (!this.#src) {
-            throw new Error('No component island src attribute found');
+        if (!this.#name) {
+            throw new Error('No component island name attribute found');
         }
 
-        const integrate = await getIntegration(this.#src);
+        const integrate = await getIntegration(this.#name);
 
         await integrate({
-            name: this.#src,
+            name: this.#name,
             props: this.#props ?? {},
             element: this
         });
@@ -42,8 +42,8 @@ class ComponentIsland extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
-            case 'src':
-                this.#src = newValue;
+            case 'name':
+                this.#name = newValue;
 
                 if (this.mounted) {
                     this.connectedCallback();
