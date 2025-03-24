@@ -19,11 +19,12 @@
     "./react": "./src/integrations/react.js"
   },
   "dependencies": {
+    "@virtualstate/navigation": "^1.0.1-alpha.209"
   },
   "peerDependencies": {
-    "vite": "^6",
     "react": "^19",
     "react-dom": "^19",
+    "vite": "^6",
     "vue": "^3"
   }
 }

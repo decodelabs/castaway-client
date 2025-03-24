@@ -1,4 +1,4 @@
-class ContentIsland extends HTMLElement {
+class FragmentIsland extends HTMLElement {
 
     static observedAttributes = ['src'];
 
@@ -7,34 +7,33 @@ class ContentIsland extends HTMLElement {
         this._internals = this.attachInternals();
     }
 
-    get collapsed() {
+    get mounted() {
         return this._internals.states.has("mounted");
-    }
-
-    connectedCallback() {
-    }
-
-    disconnectedCallback() {
-    }
-
-    adoptedCallback() {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         fetch(newValue, {
             method: 'GET',
-            cache: 'force-cache',
             headers: {
-                'X-Island': this.id || 'default'
+                'X-Fragment-Island': this.id || 'default'
             },
         })
             .then(response => response.text())
             .then(data => {
                 const dom = new DOMParser().parseFromString(data, 'text/html');
-                this.innerHTML = dom.querySelector('body').innerHTML;
+                const body = dom.querySelector('body');
+
+                while (this.firstChild) {
+                    this.removeChild(this.firstChild);
+                }
+
+                while (body.firstChild) {
+                    this.appendChild(body.firstChild);
+                }
+
                 this._internals.states.add("mounted");
             });
     }
 }
 
-window.customElements.define('content-island', ContentIsland);
+window.customElements.define('fragment-island', FragmentIsland);

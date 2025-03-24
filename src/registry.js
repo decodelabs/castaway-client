@@ -1,28 +1,5 @@
 export const registry = {
-    integrations: {},
     components: {},
-};
-
-export const defineIntegrations = (integrations) => {
-    for (const [name, integration] of Object.entries(integrations)) {
-        registry.integrations[name] = integration;
-    }
-};
-
-export const getIntegration = async (name) => {
-    return new Promise((resolve) => {
-        if (registry.integrations[name]) {
-            resolve(registry.integrations[name]);
-        }
-
-        setTimeout(() => {
-            if (!registry.integrations[name]) {
-                throw new Error(`No integration found for ${name}`);
-            }
-
-            resolve(registry.integrations[name]);
-        }, 1);
-    });
 };
 
 export const defineComponents = (components) => {
@@ -31,10 +8,10 @@ export const defineComponents = (components) => {
     }
 };
 
-export const getComponentLoader = async (name) => {
+export const getIntegration = async (name) => {
     return new Promise((resolve) => {
         if (registry.components[name]) {
-            resolve(registry.components[name]);
+            resolve(registry.components[name]());
         }
 
         setTimeout(() => {
@@ -42,7 +19,7 @@ export const getComponentLoader = async (name) => {
                 throw new Error(`No component loader found for ${name}`);
             }
 
-            resolve(registry.components[name]);
+            resolve(registry.components[name]());
         }, 1);
     });
 };

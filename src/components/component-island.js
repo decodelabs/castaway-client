@@ -1,14 +1,11 @@
-import { getComponentLoader, getIntegration } from '../registry';
+import { getIntegration } from '../registry';
 
 class ComponentIsland extends HTMLElement {
 
-    #framework;
+    static observedAttributes = ['src', 'props'];
+
     #src;
     #props;
-
-    get framework() {
-        return this.#framework;
-    }
 
     get src() {
         return this.#src;
@@ -28,36 +25,39 @@ class ComponentIsland extends HTMLElement {
     }
 
     async connectedCallback() {
-        for (let attribute of this.attributes) {
-            const match = attribute.name.match(/^([a-z]+):src$/);
-
-            if (match) {
-                this.#framework = match[1];
-                this.#src = attribute.value;
-                continue;
-            }
-
-            if (attribute.name === 'props') {
-                this.#props = JSON.parse(attribute.value);
-                continue;
-            }
+        if (!this.#src) {
+            throw new Error('No component island src attribute found');
         }
 
-        if (!this.#framework) {
-            throw new Error('No component island framework:src attribute found');
-        }
+        const integrate = await getIntegration(this.#src);
 
-        const integration = await getIntegration(this.#framework);
-        const loader = await getComponentLoader(this.#src);
-
-        integration({
+        await integrate({
             name: this.#src,
-            module: await loader(),
             props: this.#props ?? {},
             element: this
-        }).then(() => {
-            this._internals.states.add("mounted");
         });
+
+        this._internals.states.add("mounted");
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        switch (name) {
+            case 'src':
+                this.#src = newValue;
+
+                if (this.mounted) {
+                    this.connectedCallback();
+                }
+                break;
+
+            case 'props':
+                this.#props = JSON.parse(newValue);
+
+                if (this.mounted) {
+                    this.connectedCallback();
+                }
+                break;
+        }
     }
 }
 
