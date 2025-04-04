@@ -11,7 +11,15 @@ class FragmentIsland extends HTMLElement {
         return this._internals.states.has("mounted");
     }
 
+    get src() {
+        return this.getAttribute('src');
+    }
+
     attributeChangedCallback(name, oldValue, newValue) {
+        if (this.hasAttribute('disabled')) {
+            return;
+        }
+
         fetch(newValue, {
             method: 'GET',
             headers: {

@@ -25,6 +25,13 @@ class ComponentIsland extends HTMLElement {
     }
 
     async connectedCallback() {
+        if (
+            this.mounted ||
+            this.hasAttribute('disabled')
+        ) {
+            return;
+        }
+
         if (!this.#name) {
             throw new Error('No component island name attribute found');
         }

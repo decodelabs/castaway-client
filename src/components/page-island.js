@@ -1,9 +1,10 @@
 import "@virtualstate/navigation/polyfill";
+import replace from '../page-replace.js';
 let instance;
 
 class PageIsland extends HTMLElement {
 
-    static observedAttributes = [];
+    #eventHandler;
 
     constructor() {
         super();
@@ -16,12 +17,16 @@ class PageIsland extends HTMLElement {
 
     connectedCallback() {
         if (instance) {
-            //throw new Error('Only one instance of page-island is allowed');
+            throw new Error('Only one instance of page-island is allowed');
         }
 
         instance = this;
 
-        window.navigation.addEventListener('navigate', async (event) => {
+        /**
+         * We have to bundle the event handler and manually remove it
+         * as the polyfill cannot react to Abort Controller on Firefox
+         */
+        this.#eventHandler = async (event) => {
             if (!event.canIntercept) {
                 return;
             }
@@ -39,31 +44,21 @@ class PageIsland extends HTMLElement {
                     })
                         .then(response => response.text())
                         .then(data => {
-                            const dom = new DOMParser().parseFromString(data, 'text/html');
-                            const body = dom.querySelector('page-island') ?? dom.querySelector('body');
-
-                            while (this.firstChild) {
-                                this.removeChild(this.firstChild);
-                            }
-
-                            while (body.firstChild) {
-                                this.appendChild(body.firstChild);
-                            }
+                            replace(this, data);
 
                             this._internals.states.delete("loading");
                             this._internals.states.add("mounted");
                         })
                 }
             })
-        });
+        };
+
+        window.navigation.addEventListener('navigate', this.#eventHandler);
     }
 
     disconnectedCallback() {
         instance = null;
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        console.log(name, oldValue, newValue);
+        window.navigation.removeEventListener('navigate', this.#eventHandler);
     }
 }
 
