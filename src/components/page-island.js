@@ -27,7 +27,11 @@ class PageIsland extends HTMLElement {
          * as the polyfill cannot react to Abort Controller on Firefox
          */
         this.#eventHandler = async (event) => {
-            if (!event.canIntercept) {
+            if (
+                !event.canIntercept ||
+                event.target?.target === "_top" ||
+                event.target?.target === "_parent"
+            ) {
                 return;
             }
 
