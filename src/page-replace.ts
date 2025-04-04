@@ -1,19 +1,31 @@
+import ComponentIsland from './components/component-island';
+import FragmentIsland from './components/fragment-island';
+import LayoutIsland, { newLayoutId } from './components/layout-island';
+import PageIsland from './components/page-island';
+
 export default function (oldPage, data) {
     const dom = new DOMParser().parseFromString(data, 'text/html');
     replaceMeta(document, dom);
 
-    const oldLayout = document.querySelector('layout-island');
-    const newLayout = dom.querySelector('layout-island');
-    const newPage = dom.querySelector('page-island');
+    const oldLayout = document.querySelector<LayoutIsland>('layout-island');
+    const newLayout = dom.querySelector<LayoutIsland>('layout-island');
+    const newPage = dom.querySelector<PageIsland>('page-island');
 
-    const oldFragments = document.querySelectorAll('fragment-island');
-    const oldComponents = document.querySelectorAll('component-island');
+    const oldFragments = document.querySelectorAll<FragmentIsland>('fragment-island');
+    const oldComponents = document.querySelectorAll<ComponentIsland>('component-island');
 
-    const replaceFragments = [];
-    const replaceComponents = [];
+    const replaceFragments: {
+        oldFragment: FragmentIsland,
+        newFragment: FragmentIsland
+    }[] = [];
 
-    oldFragments.forEach((oldFragment) => {
-        const newFragment = dom.querySelector(`fragment-island[src="${oldFragment.src}"]`);
+    const replaceComponents: {
+        oldComponent: ComponentIsland,
+        newComponent: ComponentIsland
+    }[] = [];
+
+    oldFragments.forEach((oldFragment: FragmentIsland) => {
+        const newFragment = dom.querySelector<FragmentIsland>(`fragment-island[src="${oldFragment.src}"]`);
 
         if (newFragment) {
             newFragment.setAttribute('disabled', 'disabled');
@@ -25,7 +37,7 @@ export default function (oldPage, data) {
         }
     });
 
-    oldComponents.forEach((oldComponent) => {
+    oldComponents.forEach((oldComponent: ComponentIsland) => {
         let selector = `component-island[name="${oldComponent.name}"]`;
 
         if (oldComponent.hasAttribute('props')) {
@@ -34,7 +46,7 @@ export default function (oldPage, data) {
             selector += `:not([props])`;
         }
 
-        const newComponent = dom.querySelector(selector);
+        const newComponent = dom.querySelector<ComponentIsland>(selector);
 
         if (newComponent) {
             newComponent.setAttribute('disabled', 'disabled');
@@ -59,7 +71,7 @@ export default function (oldPage, data) {
         // Replace layout with body
         if (newPage) {
             replace(oldLayout, dom.body);
-            oldLayout.setAttribute('name', 'layout-' + Math.random().toString(36).substring(2, 11));
+            oldLayout.setAttribute('name', newLayoutId());
         } else {
             replace(oldPage, dom.body);
         }
@@ -72,7 +84,10 @@ export default function (oldPage, data) {
     replaceComponents.forEach(({ oldComponent, newComponent }) => newComponent.replaceWith(oldComponent));
 };
 
-const replace = (oldEl, newEl) => {
+export const replace = (
+    oldEl: HTMLElement,
+    newEl: HTMLElement
+) => {
     while (oldEl.firstChild) {
         oldEl.removeChild(oldEl.firstChild);
     }
@@ -82,7 +97,10 @@ const replace = (oldEl, newEl) => {
     }
 };
 
-const replaceMeta = (oldDoc, newDoc) => {
+const replaceMeta = (
+    oldDoc: Document,
+    newDoc: Document
+) => {
     oldDoc.title = newDoc.title;
     oldDoc.querySelectorAll('meta').forEach((metaTag) => metaTag.remove());
     newDoc.querySelectorAll('meta').forEach((metaTag) => oldDoc.head.appendChild(metaTag));

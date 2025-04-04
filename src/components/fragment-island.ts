@@ -1,22 +1,33 @@
+import { replace } from '../page-replace';
+
 class FragmentIsland extends HTMLElement {
 
     static observedAttributes = ['src'];
+
+    _internals: ElementInternals;
 
     constructor() {
         super();
         this._internals = this.attachInternals();
     }
 
-    get mounted() {
+    get mounted(): boolean {
         return this._internals.states.has("mounted");
     }
 
-    get src() {
+    get src(): string | null {
         return this.getAttribute('src');
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (this.hasAttribute('disabled')) {
+    attributeChangedCallback(
+        name: string,
+        oldValue: string | null,
+        newValue: string | null
+    ): void {
+        if (
+            this.hasAttribute('disabled') ||
+            !newValue
+        ) {
             return;
         }
 
@@ -29,19 +40,12 @@ class FragmentIsland extends HTMLElement {
             .then(response => response.text())
             .then(data => {
                 const dom = new DOMParser().parseFromString(data, 'text/html');
-                const body = dom.querySelector('body');
-
-                while (this.firstChild) {
-                    this.removeChild(this.firstChild);
-                }
-
-                while (body.firstChild) {
-                    this.appendChild(body.firstChild);
-                }
-
+                replace(this, dom.body);
                 this._internals.states.add("mounted");
             });
     }
 }
 
 window.customElements.define('fragment-island', FragmentIsland);
+
+export default FragmentIsland;

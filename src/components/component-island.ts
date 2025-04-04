@@ -4,18 +4,19 @@ class ComponentIsland extends HTMLElement {
 
     static observedAttributes = ['name', 'props'];
 
-    #name;
-    #props;
+    #name: string | null;
+    #props: object | null;
+    _internals: ElementInternals;
 
-    get name() {
+    get name(): string | null {
         return this.#name;
     }
 
-    get props() {
+    get props(): object | null {
         return this.#props;
     }
 
-    get mounted() {
+    get mounted(): boolean {
         return this._internals.states.has("mounted");
     }
 
@@ -47,25 +48,25 @@ class ComponentIsland extends HTMLElement {
         this._internals.states.add("mounted");
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        switch (name) {
-            case 'name':
-                this.#name = newValue;
+    attributeChangedCallback(
+        name: string,
+        oldValue: string | null,
+        newValue: string | null
+    ): void {
+        if (name === 'name') {
+            this.#name = newValue;
+        } else if (name === 'props') {
+            this.#props = newValue ? JSON.parse(newValue) : null;
+        } else {
+            return;
+        }
 
-                if (this.mounted) {
-                    this.connectedCallback();
-                }
-                break;
-
-            case 'props':
-                this.#props = JSON.parse(newValue);
-
-                if (this.mounted) {
-                    this.connectedCallback();
-                }
-                break;
+        if (this.mounted) {
+            this.connectedCallback();
         }
     }
 }
 
 window.customElements.define('component-island', ComponentIsland);
+
+export default ComponentIsland;

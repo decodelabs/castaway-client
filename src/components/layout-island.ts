@@ -1,21 +1,26 @@
 let instance;
 
+export const newLayoutId = () => {
+    return `layout-${Math.random().toString(36).substring(2, 11)}`;
+};
+
 class LayoutIsland extends HTMLElement {
 
     static observedAttributes = ['name'];
 
-    #name;
+    #name: string;
+    _internals: ElementInternals;
 
     constructor() {
         super();
         this._internals = this.attachInternals();
     }
 
-    get name() {
+    get name(): string {
         return this.#name;
     }
 
-    get mounted() {
+    get mounted(): boolean {
         return this._internals.states.has("mounted");
     }
 
@@ -25,19 +30,23 @@ class LayoutIsland extends HTMLElement {
         }
 
         instance = this;
-
-        if (!this.#name) {
-            this.#name = 'layout-' + Math.random().toString(36).substring(2, 11);
-        }
-
+        this.#name ??= newLayoutId();
         this._internals.states.add("mounted");
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'name') {
+    attributeChangedCallback(
+        name: string,
+        oldValue: string | null,
+        newValue: string | null
+    ) {
+        if (name === 'name' && newValue) {
             this.#name = newValue;
         }
     }
 }
 
 window.customElements.define('layout-island', LayoutIsland);
+
+export default LayoutIsland;
+
+

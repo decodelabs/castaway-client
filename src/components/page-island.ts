@@ -1,17 +1,21 @@
+// Add types for window.navigation for use in this file. See https://www.typescriptlang.org/docs/handbook/triple-slash-directives.html#-reference-types- for more info.
+/// <reference types="navigation-api-types" />
+
 import "@virtualstate/navigation/polyfill";
-import replace from '../page-replace.js';
+import replace from '../page-replace';
 let instance;
 
 class PageIsland extends HTMLElement {
 
-    #eventHandler;
+    #eventHandler: (event: NavigateEvent) => Promise<void>;
+    _internals: ElementInternals;
 
     constructor() {
         super();
         this._internals = this.attachInternals();
     }
 
-    get mounted() {
+    get mounted(): boolean {
         return this._internals.states.has("mounted");
     }
 
@@ -26,13 +30,21 @@ class PageIsland extends HTMLElement {
          * We have to bundle the event handler and manually remove it
          * as the polyfill cannot react to Abort Controller on Firefox
          */
-        this.#eventHandler = async (event) => {
+        this.#eventHandler = async (event: NavigateEvent) => {
             if (
                 !event.canIntercept ||
-                event.target?.target === "_top" ||
-                event.target?.target === "_parent"
+                (event.target as HTMLAnchorElement)?.target === "_top" ||
+                (event.target as HTMLAnchorElement)?.target === "_parent"
             ) {
                 return;
+            }
+
+            let method: string = 'GET',
+                body: FormData | null = null;
+
+            if (event.formData) {
+                method = 'POST';
+                body = event.formData;
             }
 
             this._internals.states.delete("mounted");
@@ -41,7 +53,8 @@ class PageIsland extends HTMLElement {
             event.intercept({
                 handler: async () => {
                     fetch(event.destination.url, {
-                        method: 'GET',
+                        method,
+                        body,
                         headers: {
                             'X-Page-Island': 'page'
                         },
@@ -57,13 +70,15 @@ class PageIsland extends HTMLElement {
             })
         };
 
-        window.navigation.addEventListener('navigate', this.#eventHandler);
+        window.navigation?.addEventListener('navigate', this.#eventHandler);
     }
 
     disconnectedCallback() {
         instance = null;
-        window.navigation.removeEventListener('navigate', this.#eventHandler);
+        window.navigation?.removeEventListener('navigate', this.#eventHandler);
     }
 }
 
 window.customElements.define('page-island', PageIsland);
+
+export default PageIsland;
