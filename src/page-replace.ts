@@ -3,13 +3,16 @@ import FragmentIsland from './components/fragment-island';
 import LayoutIsland, { newLayoutId } from './components/layout-island';
 import PageIsland from './components/page-island';
 
-export default function (oldPage, data) {
+export default function (
+    oldPage: PageIsland | FragmentIsland,
+    data: string
+) {
     const dom = new DOMParser().parseFromString(data, 'text/html');
-    replaceMeta(document, dom);
+    const mergeDoc = oldPage.tagName === 'PAGE-ISLAND';
 
-    const oldLayout = document.querySelector<LayoutIsland>('layout-island');
-    const newLayout = dom.querySelector<LayoutIsland>('layout-island');
-    const newPage = dom.querySelector<PageIsland>('page-island');
+    if (mergeDoc) {
+        replaceMeta(document, dom);
+    }
 
     const oldFragments = document.querySelectorAll<FragmentIsland>('fragment-island');
     const oldComponents = document.querySelectorAll<ComponentIsland>('component-island');
@@ -58,26 +61,35 @@ export default function (oldPage, data) {
         }
     });
 
-    if (oldLayout && newLayout) {
-        if (oldLayout.name === newLayout.name) {
-            // Replace page
-            replace(oldPage, newPage ?? dom.body);
+    if (mergeDoc) {
+        const oldLayout = document.querySelector<LayoutIsland>('layout-island');
+        const newLayout = dom.querySelector<LayoutIsland>('layout-island');
+        const newPage = dom.querySelector<PageIsland>('page-island');
+
+        if (oldLayout && newLayout) {
+            if (oldLayout.name === newLayout.name) {
+                // Replace page
+                replace(oldPage, newPage ?? dom.body);
+            } else {
+                // Replace layout
+                replace(oldLayout, newLayout);
+                oldLayout.setAttribute('name', newLayout.name);
+            }
+        } else if (oldLayout) {
+            // Replace layout with body
+            if (newPage) {
+                replace(oldLayout, dom.body);
+                oldLayout.setAttribute('name', newLayoutId());
+            } else {
+                replace(oldPage, dom.body);
+            }
         } else {
-            // Replace layout
-            replace(oldLayout, newLayout);
-            oldLayout.setAttribute('name', newLayout.name);
-        }
-    } else if (oldLayout) {
-        // Replace layout with body
-        if (newPage) {
-            replace(oldLayout, dom.body);
-            oldLayout.setAttribute('name', newLayoutId());
-        } else {
-            replace(oldPage, dom.body);
+            // Replace body
+            replace(document.body, dom.body);
         }
     } else {
-        // Replace body
-        replace(document.body, dom.body);
+        // Replace fragment
+        replace(oldPage, dom.body);
     }
 
     replaceFragments.forEach(({ oldFragment, newFragment }) => newFragment.replaceWith(oldFragment));

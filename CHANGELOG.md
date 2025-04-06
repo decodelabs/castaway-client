@@ -1,3 +1,8 @@
+* Restructured navigation handler
+* Added link target handling
+* Added button and form target handling
+* Always load navigation handler
+
 ## v0.1.0 (2025-04-04)
 * Initial component implementation
 * Built initial Page island structure

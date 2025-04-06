@@ -1,3 +1,4 @@
+import { loadDestination } from '../navigation';
 import { replace } from '../page-replace';
 
 class FragmentIsland extends HTMLElement {
@@ -31,18 +32,22 @@ class FragmentIsland extends HTMLElement {
             return;
         }
 
-        fetch(newValue, {
-            method: 'GET',
-            headers: {
-                'X-Fragment-Island': this.id || 'default'
-            },
-        })
-            .then(response => response.text())
-            .then(data => {
-                const dom = new DOMParser().parseFromString(data, 'text/html');
-                replace(this, dom.body);
-                this._internals.states.add("mounted");
-            });
+        loadDestination(
+            this,
+            newValue,
+            'GET',
+            null
+        );
+    }
+
+    _onLoadStart() {
+        this._internals.states.delete("mounted");
+        this._internals.states.add("loading");
+    }
+
+    _onLoadEnd() {
+        this._internals.states.delete("loading");
+        this._internals.states.add("mounted");
     }
 }
 
