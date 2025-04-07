@@ -19,11 +19,11 @@
     "./react": "./src/integrations/react.ts"
   },
   "dependencies": {
-    "@types/react": "^19.1.0",
     "@virtualstate/navigation": "^1.0.1-alpha.209"
   },
   "devDependencies": {
-    "navigation-api-types": "^0.6.1"
+    "navigation-api-types": "^0.6.1",
+    "@types/react": "^19.1.0"
   },
   "peerDependencies": {
     "react": "^19",
