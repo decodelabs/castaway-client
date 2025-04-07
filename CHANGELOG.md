@@ -1,3 +1,4 @@
+## v0.1.1 (2025-04-07)
 * Restructured navigation handler
 * Added link target handling
 * Added button and form target handling
