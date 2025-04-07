@@ -14,14 +14,29 @@ export default (promise: Promise<{ default: Component }>): Integration => {
 
         return new Promise((resolve) => {
             const app = createApp({
-                name: component.name + '-host',
+                name: name + '-host',
+
+                data() {
+                    return props;
+                },
+
                 mounted() {
                     resolve({
-                        root: app
+                        root: app,
+                        update: (newProps: object) => {
+                            Object.keys(newProps).forEach((key) => {
+                                props[key] = newProps[key];
+                            });
+
+                            this.$forceUpdate();
+                        },
+                        destroy: () => {
+                            app.unmount();
+                        }
                     });
                 },
                 render() {
-                    return h(component, props);
+                    return h(component, this.$data);
                 }
             });
 

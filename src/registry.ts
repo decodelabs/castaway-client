@@ -3,7 +3,9 @@ export type ComponentDefinition = {
 }
 
 export type ComponentRoot = {
-    root: object
+    root: object,
+    update: (props: object) => void,
+    destroy: () => void
 }
 
 export type IntegrationOptions = {
