@@ -2,6 +2,7 @@
 * Added link target handling
 * Added button and form target handling
 * Always load navigation handler
+* Implemented view transitions
 
 ## v0.1.0 (2025-04-04)
 * Initial component implementation

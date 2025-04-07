@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { type FC } from 'react';
+import { createElement, type FC } from 'react';
 import {
     type ComponentRoot,
     type IntegrationOptions,
@@ -15,10 +15,16 @@ export default (promise: Promise<{ [key: string]: FC }>): Integration => {
 
         return new Promise((resolve) => {
             const app = createRoot(element);
-            app.render(component({ ...props }));
+            app.render(createElement(component, props));
 
             resolve({
-                root: app
+                root: app,
+                update: (props: object) => {
+                    app.render(createElement(component, props));
+                },
+                destroy: () => {
+                    app.unmount();
+                }
             });
         });
     };

@@ -1,4 +1,4 @@
-import { getIntegration } from '../registry';
+import { getIntegration, type ComponentRoot } from '../registry';
 
 class ComponentIsland extends HTMLElement {
 
@@ -6,6 +6,7 @@ class ComponentIsland extends HTMLElement {
 
     #name: string | null;
     #props: object | null;
+    #root: ComponentRoot | null;
     _internals: ElementInternals;
 
     get name(): string | null {
@@ -39,7 +40,7 @@ class ComponentIsland extends HTMLElement {
 
         const integrate = await getIntegration(this.#name);
 
-        await integrate({
+        this.#root = await integrate({
             name: this.#name,
             props: this.#props ?? {},
             element: this
@@ -61,8 +62,12 @@ class ComponentIsland extends HTMLElement {
             return;
         }
 
-        if (this.mounted) {
-            this.connectedCallback();
+        if (
+            this.mounted &&
+            this.#root &&
+            newValue !== oldValue
+        ) {
+            this.#root.update(this.#props ?? {});
         }
     }
 }

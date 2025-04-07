@@ -1,6 +1,6 @@
 {
   "name": "@decodelabs/castaway",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Front end island components",
   "homepage": "https://github.com/decodelabs/castaway-client#readme",
   "bugs": {
@@ -19,6 +19,7 @@
     "./react": "./src/integrations/react.ts"
   },
   "dependencies": {
+    "@types/react": "^19.1.0",
     "@virtualstate/navigation": "^1.0.1-alpha.209"
   },
   "devDependencies": {

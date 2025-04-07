@@ -14,6 +14,8 @@ export default function (
         replaceMeta(document, dom);
     }
 
+
+    // Collect framgent and components to replace
     const oldFragments = document.querySelectorAll<FragmentIsland>('fragment-island');
     const oldComponents = document.querySelectorAll<ComponentIsland>('component-island');
 
@@ -43,10 +45,12 @@ export default function (
     oldComponents.forEach((oldComponent: ComponentIsland) => {
         let selector = `component-island[name="${oldComponent.name}"]`;
 
-        if (oldComponent.hasAttribute('props')) {
-            selector += `[props='${oldComponent.getAttribute('props')}']`;
-        } else {
-            selector += `:not([props])`;
+        if (!oldComponent.hasAttribute('propagate')) {
+            if (oldComponent.hasAttribute('props')) {
+                selector += `[props='${oldComponent.getAttribute('props')}']`;
+            } else {
+                selector += `:not([props])`;
+            }
         }
 
         const newComponent = dom.querySelector<ComponentIsland>(selector);
@@ -61,6 +65,26 @@ export default function (
         }
     });
 
+
+    // Replace fragments and components
+    const afterReplace = () => {
+        replaceFragments.forEach(({ oldFragment, newFragment }) => newFragment.replaceWith(oldFragment));
+
+        replaceComponents.forEach(({ oldComponent, newComponent }) => {
+            newComponent.replaceWith(oldComponent);
+
+            if (oldComponent.hasAttribute('propagate')) {
+                if (newComponent.hasAttribute('props')) {
+                    oldComponent.setAttribute('props', newComponent.getAttribute('props') as string);
+                } else {
+                    oldComponent.removeAttribute('props');
+                }
+            }
+        });
+    };
+
+
+    // Replace layout or body
     if (mergeDoc) {
         const oldLayout = document.querySelector<LayoutIsland>('layout-island');
         const newLayout = dom.querySelector<LayoutIsland>('layout-island');
@@ -69,43 +93,58 @@ export default function (
         if (oldLayout && newLayout) {
             if (oldLayout.name === newLayout.name) {
                 // Replace page
-                replace(oldPage, newPage ?? dom.body);
+                replace(oldPage, newPage ?? dom.body, afterReplace);
             } else {
                 // Replace layout
-                replace(oldLayout, newLayout);
-                oldLayout.setAttribute('name', newLayout.name);
+                replace(oldLayout, newLayout, afterReplace);
+
+                if (newLayout.hasAttribute('name')) {
+                    oldLayout.setAttribute('name', newLayout.getAttribute('name') as string);
+                } else {
+                    oldLayout.removeAttribute('name');
+                }
             }
         } else if (oldLayout) {
             // Replace layout with body
             if (newPage) {
-                replace(oldLayout, dom.body);
+                replace(oldLayout, dom.body, afterReplace);
                 oldLayout.setAttribute('name', newLayoutId());
             } else {
-                replace(oldPage, dom.body);
+                replace(oldPage, dom.body, afterReplace);
             }
         } else {
             // Replace body
-            replace(document.body, dom.body);
+            replace(document.body, dom.body, afterReplace);
         }
     } else {
         // Replace fragment
-        replace(oldPage, dom.body);
+        replace(oldPage, dom.body, afterReplace);
     }
-
-    replaceFragments.forEach(({ oldFragment, newFragment }) => newFragment.replaceWith(oldFragment));
-    replaceComponents.forEach(({ oldComponent, newComponent }) => newComponent.replaceWith(oldComponent));
 };
 
 export const replace = (
     oldEl: HTMLElement,
-    newEl: HTMLElement
+    newEl: HTMLElement,
+    afterReplace: (() => void) | null = null
 ) => {
-    while (oldEl.firstChild) {
-        oldEl.removeChild(oldEl.firstChild);
-    }
+    const replaceChildren = () => {
+        while (oldEl.firstChild) {
+            oldEl.removeChild(oldEl.firstChild);
+        }
 
-    while (newEl.firstChild) {
-        oldEl.appendChild(newEl.firstChild);
+        while (newEl.firstChild) {
+            oldEl.appendChild(newEl.firstChild);
+        }
+
+        if (afterReplace) {
+            afterReplace();
+        }
+    };
+
+    if (document.startViewTransition) {
+        document.startViewTransition(replaceChildren);
+    } else {
+        replaceChildren();
     }
 };
 

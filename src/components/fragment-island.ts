@@ -32,12 +32,11 @@ class FragmentIsland extends HTMLElement {
             return;
         }
 
-        loadDestination(
-            this,
-            newValue,
-            'GET',
-            null
-        );
+        loadDestination({
+            url: newValue,
+            frame: this,
+            method: 'GET'
+        });
     }
 
     _onLoadStart() {
